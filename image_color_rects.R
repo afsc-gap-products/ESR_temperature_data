@@ -1,4 +1,4 @@
-image.color.rects <- function (survey = "AI", file.path = file.target, channel = NA, yr = 2022){
+image.color.rects <- function (survey = "AI", file.path = file.target, channel = NA, yr = 2023){
   #############################################################################
   ## Function name:  image.color.rects
   ##
