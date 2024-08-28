@@ -100,9 +100,8 @@ make.esr.temperatures()
 
 
 ##### ALEUTIANS #######
-
-temperature_summary <- read.csv(paste0(getwd(),"/temperature_summary.csv"))
-temperature_summary$year <- as.integer(substring(temperature_summary$ob_time,1,4))
+temperature_summary <- read.csv(paste0(getwd(), "/temperature_summary.csv"))
+temperature_summary$year <- as.integer(substring(temperature_summary$ob_time, 1, 4))
 
 library(dplyr)
 library(tidyverse)
@@ -174,8 +173,11 @@ ggplot2::ggplot(mean_temp, aes(x = year, y = mean_SST)) +
         axis.text.x = element_text(angle = 75, vjust = 0.5, hjust = 0.5, size = 21),
         axis.ticks = element_line(size = 2), 
         axis.ticks.length = unit(0.25, "cm")) +
-  facet_grid(~ factor(inpfc_area,
-                      levels = c('Western Aleutians', 'Central Aleutians', 'Eastern Aleutians', "Southern Bering Sea")))
+  facet_grid(~factor(inpfc_area,
+                     levels = c('Western Aleutians', 
+                                'Central Aleutians', 
+                                'Eastern Aleutians', 
+                                'Southern Bering Sea')))
 
 ## anomaly plot
 ggplot2::ggplot(mean_temp, aes(x = year, y = SST_anomaly)) +
@@ -201,12 +203,15 @@ ggplot2::ggplot(mean_temp, aes(x = year, y = SST_anomaly)) +
         axis.text.x = element_text(angle = 75, vjust = 0.5, hjust=0.5, size = 21),
         axis.ticks = element_line(size = 2),
         axis.ticks.length = unit(0.25, "cm")) +
-  # facet_grid(~factor(inpfc_area, levels=c('Western Aleutians', 'Central Aleutians', 'Eastern Aleutians', "Southern Bering Sea")))
-  facet_grid(~ factor(inpfc_area, levels=c('Western Aleutians', 'Central Aleutians', 'Eastern Aleutians', "Southern Bering Sea")))
+  # facet_grid(~factor(inpfc_area, levels = c('Western Aleutians', 'Central Aleutians', 'Eastern Aleutians', "Southern Bering Sea")))
+  facet_grid(~factor(inpfc_area, levels = c('Western Aleutians', 
+                                            'Central Aleutians', 
+                                            'Eastern Aleutians', 
+                                            'Southern Bering Sea')))
 
 
 
-temperature_summary_2022 <- temperature_summary[which(temperature_summary$year == 2022),]
+temperature_summary_2022 <- temperature_summary[which(temperature_summary$year == 2022), ]
 
 sst <- ggplot2::ggplot(temperature_summary, 
                        aes(x = year, y = surface_temp)) +
@@ -216,7 +221,7 @@ sst <- ggplot2::ggplot(temperature_summary,
   theme(text = element_text(size = 23),
         legend.text = element_text(size = 17),
         legend.title = element_text(size = 17))+
-  facet_grid(~ inpfc_area)
+  facet_grid(~inpfc_area)
 
 
 bt <- ggplot2::ggplot(temperature_summary, 
@@ -227,6 +232,6 @@ bt <- ggplot2::ggplot(temperature_summary,
   theme(text = element_text(size = 23),
         legend.text = element_text(size = 17),
         legend.title = element_text(size = 17))+
-  facet_grid(~ inpfc_area)
+  facet_grid(~inpfc_area)
 
-gridExtra::grid.arrange(sst, bt, nrow=1)
+gridExtra::grid.arrange(sst, bt, nrow = 1)
