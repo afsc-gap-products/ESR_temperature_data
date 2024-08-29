@@ -139,38 +139,50 @@ all_years <- data.frame(year = c(1994:2022))
 mean_temp_all_years <- bind_rows(mean_temp, all_years) %>% arrange(year)
 
 library(ggplot2)
-ggplot2::ggplot(mean_temp, aes(x = year, y = mean_SST)) +
-  geom_point(col = "orange", size = 6) +
+ggplot2::ggplot(data = mean_temp, 
+                aes(x = year,
+                    y = mean_SST)) +
+  geom_point(aes(x = year,
+                 y = mean_SST,
+                 color = "SST"), 
+             size = 4) +
+  geom_point(aes(x = year, 
+                 y = mean_BT,
+                 color = "BT"),  
+             size = 4) +
+  scale_color_manual(values = c("orange", "purple"),
+                     breaks = c("SST", "BT")) +
   geom_errorbar(aes(ymin = mean_SST - mean_SST_SD, 
                     ymax = mean_SST + mean_SST_SD), 
-                width = 2, 
-                position = position_dodge(0.9), 
-                col = "orange") +
-  geom_point(aes(x = year, 
-                 y = mean_BT), 
-             col = "purple", 
-             size = 6) +
+                color = "darkorange3", 
+                width = 1.5,
+                size = 1.2,
+                position = position_dodge(0.9)) +
   geom_errorbar(aes(ymin = mean_BT - mean_BT_SD,
                     ymax = mean_BT + mean_BT_SD), 
-                width = 2, 
-                position = position_dodge(0.9), 
-                col = "purple") +
+                color = "purple4", 
+                width = 1.5, 
+                size = 1,
+                position = position_dodge(0.9)) +
   geom_hline(yintercept = mean(mean_temp$mean_SST, na.rm = TRUE), 
-             col = "orange", 
-             size = 2) +
+             color = "orange", 
+             size = 1) +
   geom_hline(yintercept = mean(mean_temp$mean_BT, na.rm = TRUE), 
-             col = "purple", 
-             size = 2) +
+             color = "purple", 
+             size = 1.2) +
   ggtitle("Mean SST and Bottom Temp") +
   ylab("mean temperature (°C)") +
   theme_bw() +
   scale_x_continuous(breaks = round(seq(min(mean_temp$year), 2025, by = 4), 1)) + # max(mean_temp$year)
   # scale_x_discrete(limits=c("1994","2000","2002","2004","2006","2008","2010","2012","2014","2016","2018","2020","2022")) +
-  theme(text = element_text(size = 23),
-        legend.text = element_text(size = 4),
-        legend.title = element_text(size = 17),
-        axis.text.y = element_text(vjust = 0.5, hjust = 0.5, size = 25),
-        axis.text.x = element_text(angle = 75, vjust = 0.5, hjust = 0.5, size = 21),
+  theme(plot.title = element_text(size = 24),
+        legend.text = element_text(size = 15),
+        legend.title = element_blank(),
+        legend.position = "bottom",
+        strip.text = element_text(size = 18),
+        axis.title = element_text(size = 20),
+        axis.text.y = element_text(vjust = 0.5, hjust = 0.5, size = 17),
+        axis.text.x = element_text(angle = 75, vjust = 0.5, hjust = 0.5, size = 17),
         axis.ticks = element_line(size = 2), 
         axis.ticks.length = unit(0.25, "cm")) +
   facet_grid(~factor(inpfc_area,
@@ -181,10 +193,16 @@ ggplot2::ggplot(mean_temp, aes(x = year, y = mean_SST)) +
 
 ## anomaly plot
 ggplot2::ggplot(mean_temp, aes(x = year, y = SST_anomaly)) +
-  geom_point(col = "orange", size = 5) +
-  geom_point(aes(x = year, y = BT_anomaly),
-             col = "purple",
-             size = 5) +
+  geom_point(aes(x = year,
+                 y = SST_anomaly,
+                 color = "SST Anomaly"), 
+             size = 4) +
+  geom_point(aes(x = year, 
+                 y = BT_anomaly,
+                 color = "BT Anomaly"),  
+             size = 4) +
+  scale_color_manual(values = c("orange", "purple"),
+                     breaks = c("SST Anomaly", "BT Anomaly")) +
   geom_hline(yintercept = mean(mean_temp$SST_anomaly, na.rm = TRUE),
              col = "orange",
              size = 1) +
@@ -196,12 +214,15 @@ ggplot2::ggplot(mean_temp, aes(x = year, y = SST_anomaly)) +
   theme_bw() +
   scale_x_continuous(breaks = round(seq(min(mean_temp$year), max(mean_temp$year), by = 4), 1)) +
   # scale_x_discrete(limits = c("1994", "2000", "2002", "2004", "2006", "2008", "2010", "2012", "2014", "2016", "2018", "2020", "2022")) +
-  theme(text = element_text(size = 23),
-        legend.text = element_text(size = 17),
-        legend.title = element_text(size = 17),
-        axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = 25),
-        axis.text.x = element_text(angle = 75, vjust = 0.5, hjust=0.5, size = 21),
-        axis.ticks = element_line(size = 2),
+  theme(plot.title = element_text(size = 24),
+        legend.text = element_text(size = 15),
+        legend.title = element_blank(),
+        legend.position = "bottom",
+        strip.text = element_text(size = 18),
+        axis.title = element_text(size = 20),
+        axis.text.y = element_text(vjust = 0.5, hjust = 0.5, size = 17),
+        axis.text.x = element_text(angle = 75, vjust = 0.5, hjust = 0.5, size = 17),
+        axis.ticks = element_line(size = 2), 
         axis.ticks.length = unit(0.25, "cm")) +
   # facet_grid(~factor(inpfc_area, levels = c('Western Aleutians', 'Central Aleutians', 'Eastern Aleutians', "Southern Bering Sea")))
   facet_grid(~factor(inpfc_area, levels = c('Western Aleutians', 
