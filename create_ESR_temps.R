@@ -230,6 +230,59 @@ ggplot2::ggplot(mean_temp, aes(x = year, y = SST_anomaly)) +
                                             'Eastern Aleutians', 
                                             'Southern Bering Sea')))
 
+# All years surface
+ggplot2::ggplot(temperature_summary, 
+                aes(x = year, y = surface_temp, group = year)) +
+  ggdist::stat_halfeye(adjust = 0.5,
+                       justification = -0.2,
+                       .width = 0,
+                       point_colour = "deeppink4",
+                       fill = "deeppink4") +
+  geom_boxplot(width = 0.15,
+               outlier.color = NA,
+               alpha = 0.5,
+               color = "black") +
+  geom_point(alpha = 0.05,
+             size = 3,
+             shape = 95,
+             color = "deeppink") +
+  ggtitle("Sea Surface Temperature") +
+  ylab("temperature (°C)") +
+  scale_x_continuous(breaks = round(seq(min(mean_temp$year), max(mean_temp$year), by = 4), 1)) +
+  theme_bw() +
+  theme(plot.title = element_text(size = 24),
+        axis.title = element_text(size = 20),
+        axis.text.y = element_text(vjust = 0.5, hjust = 0.5, size = 17),
+        axis.text.x = element_text(angle = 75, vjust = 0.5, hjust = 0.5, size = 17),
+        axis.ticks = element_line(size = 2), 
+        axis.ticks.length = unit(0.25, "cm"))
+
+# All years bottom
+ggplot2::ggplot(temperature_summary, 
+                aes(x = year, y = temp200m, group = year)) +
+  ggdist::stat_halfeye(adjust = 0.5,
+                       justification = -0.2,
+                       .width = 0,
+                       point_colour = "deeppink4",
+                       fill = "deeppink4") +
+  geom_boxplot(width = 0.15,
+               outlier.color = NA,
+               alpha = 0.5,
+               color = "black") +
+  geom_point(alpha = 0.1,
+             size = 3,
+             shape = 95,
+             color = "deeppink") +
+  ggtitle("Bottom Temperature") +
+  ylab("temperature (°C)") +
+  scale_x_continuous(breaks = round(seq(min(mean_temp$year), max(mean_temp$year), by = 4), 1)) +
+  theme_bw() +
+  theme(plot.title = element_text(size = 24),
+        axis.title = element_text(size = 20),
+        axis.text.y = element_text(vjust = 0.5, hjust = 0.5, size = 17),
+        axis.text.x = element_text(angle = 75, vjust = 0.5, hjust = 0.5, size = 17),
+        axis.ticks = element_line(size = 2), 
+        axis.ticks.length = unit(0.25, "cm"))
 
 
 temperature_summary_2022 <- temperature_summary[which(temperature_summary$year == 2022), ]
@@ -256,3 +309,39 @@ bt <- ggplot2::ggplot(temperature_summary,
   facet_grid(~inpfc_area)
 
 gridExtra::grid.arrange(sst, bt, nrow = 1)
+
+
+# Possible alternatives
+library(gghalves)
+library(ggdist)
+library(ggpp)
+library(cowplot)
+
+ggplot(data = temperature_summary,
+       aes(x = year,
+           y = temp200m)) +
+  stat_slab(side = "right", 
+            scale = 0.4,
+            position = position_dodge(width = 0.8),
+            aes(fill_ramp = stat(level)),
+            fill = "darksalmon",
+            .width = c(0.5, 0.95, 1),
+            alpha = 0.8) +
+  stat_dots(side = "left", 
+            scale = 0.4, 
+            position = position_dodge(width = 0.2),
+            color = "black",
+            alpha = 0.2) +
+  stat_summary(fun.data = "mean_cl_normal",
+               size = 0.4,
+               position = position_dodge2nudge(x = 0.1, width = 0.8)) +
+  ggtitle("Bottom Temperature") +
+  ylab("temperature (°C)") +
+  scale_x_continuous(breaks = round(seq(min(mean_temp$year), max(mean_temp$year), by = 4), 1)) +
+  theme_bw() +
+  theme(plot.title = element_text(size = 24),
+        axis.title = element_text(size = 20),
+        axis.text.y = element_text(vjust = 0.5, hjust = 0.5, size = 17),
+        axis.text.x = element_text(angle = 75, vjust = 0.5, hjust = 0.5, size = 17),
+        axis.ticks = element_line(size = 2), 
+        axis.ticks.length = unit(0.25, "cm"))
