@@ -64,9 +64,11 @@ make.esr.temperatures <- function(){
           survey.name = "Gulf of Alaska Bottom Trawl Survey"
      }
      if(region == "AI"){
-          # AI triennial in the 1990s, biennial in 2000s. 1994 is earliest BT cast year available for AI
+          # AI triennial in the 1990s, biennial in 2000s. 1991? is earliest BT cast year available for AI
+          # 1991 seems to be earliest year but does not get pulled in and previous reports use only 1994 onward
+          # Currently just using 1994-present even with this script
           new.years <- noquote(paste(seq(2006, year, by = 2), collapse = ","))
-          old.years <- noquote(paste(c(seq(1994, 2000, by = 3),seq(2002, 2006, by = 2)), collapse = ","))
+          old.years <- noquote(paste(c(seq(1991, 2000, by = 3),seq(2002, 2006, by = 2)), collapse = ","))
           years <- noquote(paste(c(old.years, new.years), collapse = ","))
           survey.name = "Aleutian Islands Bottom Trawl Survey"
      }
@@ -351,9 +353,9 @@ get.ob.fb.time <- function(channel = NA, region = region, new.years = new.years)
           and extract(month from b.date_time) between 5 and 9
           union
           select vessel,cruise,haul, start_time ob_time, start_time + duration/(24) fb_time
-          from racebase.haul where region = 'AI' and cruise between 199301 and 199601
+          from racebase.haul where region = 'AI' and cruise between 199101 and 199801
           and vessel != 21 and extract(month from start_time) between 5 and 9 order by cruise,vessel,haul")
-    }
+    } # changed to include 1991 & 1997, need to figure out why this was excluded
   
     pos.dat <- RODBC::sqlQuery(channel = channel, query = dat.query)
     names(pos.dat) <- casefold(names(pos.dat))
@@ -411,7 +413,7 @@ get.haul.pos <- function(channel = NA, region = region, year = year){
     dat.query <- paste0("select a.vessel, a.cruise, a.haul, a.stationid, a. stratum, b.inpfc_area, a.start_longitude longitude, a.start_latitude latitude, a.bottom_depth
           from racebase.haul a, goa.goa_strata b 
           where region = 'AI' 
-          and floor(cruise/100) between 1993 and ", year, " 
+          and floor(cruise/100) between 1991 and ", year, " 
           and vessel not in (21,159) 
           and start_longitude is not null 
           and start_latitude is not null 
