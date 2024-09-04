@@ -105,6 +105,7 @@ temperature_summary$year <- as.integer(substring(temperature_summary$ob_time, 1,
 
 library(dplyr)
 library(tidyverse)
+# Limited to these years because earliest BT data available is in 1994 for AI
 total_mean_SST <- mean(temperature_summary$surface_temp[which(temperature_summary$year >= 1994 &
                                                                 temperature_summary$year <= 2014)], na.rm = TRUE)
 total_mean_BT <- mean(temperature_summary$temp200m[which(temperature_summary$year >= 1994 & 
