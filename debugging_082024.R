@@ -23,6 +23,8 @@ pos.time.dat91 <- dplyr::filter(pos.time.dat, cruise < 199201) # this gives data
 temperature.summary <- data.frame() # this populates with 1994-2024
 temp.summary.names <- c("vessel","cruise","haul","inpfc_area","surface_temp","surface_temp_sd","surface_temp_n",
                         "temp100m","temp100m_sd","temp100m_n","temp200m","temp200m_sd","temp200m_n", "sst", "bottom_temp")
+pos.temp.names <- c("vessel", "cruise", "haul", "stationid", "stratum", "inpfc_area", "longitude", "latitude",
+                    "bottom_depth", "sst", "bottom_temp", "ob_time", "fb_time")
 
 for(Cr in sort(unique(dat$cruise))){
   
@@ -115,6 +117,7 @@ for(Cr in sort(unique(dat$cruise))){
 }
 
 # add the 1991 data to the 1994-2024 data
+names(pos.time.dat91) <- pos.temp.names 
 temperature.summary91 <- rbindlist(list(temperature.summary, pos.time.dat91),
                                    fill = TRUE)
 

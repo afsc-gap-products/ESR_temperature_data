@@ -98,6 +98,8 @@ make.esr.temperatures <- function(){
      temperature.summary <- data.frame()
      temp.summary.names <- c("vessel","cruise","haul","inpfc_area","surface_temp","surface_temp_sd","surface_temp_n",
                              "temp100m","temp100m_sd","temp100m_n","temp200m","temp200m_sd","temp200m_n", "sst", "bottom_temp")
+     pos.temp.names <- c("vessel", "cruise", "haul", "stationid", "stratum", "inpfc_area", "longitude", "latitude",
+                         "bottom_depth", "sst", "bottom_temp", "ob_time", "fb_time")
      
      for(Cr in sort(unique(dat$cruise))){
        
@@ -190,9 +192,12 @@ make.esr.temperatures <- function(){
      }
 
      names(temperature.summary) <- temp.summary.names
+     names(pos.time.dat91) <- pos.temp.names 
      temperature.summary <- merge(temperature.summary, pos.time.dat)
-     temperature.final <- rbindlist(list(temperature.summary, pos.time.dat91),
+     temperature.bind <- rbindlist(list(temperature.summary, pos.time.dat91),
                                     fill = TRUE)
+     temperature.final <- dplyr::select(temperature.bind, -c("surface_temperature", "gear_temperature"))
+
      print("Writing temperature summary...")
      write.csv(temperature.final, "temperature_summary.csv", row.names = F)
      # return(temperature.summary)
