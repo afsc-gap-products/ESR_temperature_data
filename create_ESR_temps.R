@@ -16,7 +16,7 @@ make.esr.temperatures()
 #   #group_by(year,inpfc_area) %>%
 #   summarise(mean_SST = mean(surface_temp , na.rm = TRUE),
 #             mean_BT = mean(temp200m, na.rm=TRUE),
-#             mean_SST_SD = mean(surface_temp_sd, na.rm=TRUE),
+#             mean_surface_temp_sd = mean(surface_temp_sd, na.rm=TRUE),
 #             mean_BT_SD = mean(temp200m_sd, na.rm=TRUE),
 #             SST_anomaly = mean_SST - total_mean_SST,
 #             BT_anomaly = mean_BT - total_mean_BT)
@@ -30,7 +30,7 @@ make.esr.temperatures()
 # library(ggplot2)
 # ggplot2::ggplot(mean_temp, aes(x=year, y = mean_SST)) +
 #   geom_point(col = "orange", size = 6) +
-#   geom_errorbar(aes(ymin=mean_SST-mean_SST_SD, ymax=mean_SST+mean_SST_SD), width=2,
+#   geom_errorbar(aes(ymin=mean_SST-mean_surface_temp_sd, ymax=mean_SST+mean_surface_temp_sd), width=2,
 #                 position=position_dodge(0.9), col = "orange") +
 #   geom_point(aes(x=year,y=mean_BT), col = "purple", size = 6) +
 #   geom_errorbar(aes(ymin=mean_BT-mean_BT_SD, ymax=mean_BT+mean_BT_SD), width=2,
@@ -105,30 +105,31 @@ temperature_summary$year <- as.integer(substring(temperature_summary$ob_time, 1,
 
 library(dplyr)
 library(tidyverse)
-# Limited to these years because earliest BT data available is in 1994 for AI
-total_mean_SST <- mean(temperature_summary$surface_temp[which(temperature_summary$year >= 1994 &
-                                                                temperature_summary$year <= 2014)], na.rm = TRUE)
-total_mean_BT <- mean(temperature_summary$temp200m[which(temperature_summary$year >= 1994 & 
-                                                           temperature_summary$year <= 2014)], na.rm = TRUE)
+library(here)
+# Limited to these years because earliest BT data available is in 1991 for AI
+# Casts are limited to 1994 so change if using those data instead
+total_mean_SST <- mean(temperature_summary$surface_temp[which(temperature_summary$year >= 1991 &
+                                                                temperature_summary$year <= 2012)], na.rm = TRUE)
+total_mean_BT <- mean(temperature_summary$temp200m[which(temperature_summary$year >= 1991 & 
+                                                           temperature_summary$year <= 2012)], na.rm = TRUE)
 area_mean_BT <- temperature_summary %>%
   group_by(inpfc_area) %>%
-  summarise(mean_SST_20y = mean(surface_temp[which(year >= 1994 &
-                                                     year <= 2014)], na.rm = TRUE),
-            mean_BT_20y = mean(temp200m[which(year >= 1994 &
-                                                year <= 2014)], na.rm = TRUE),
-            meansd_SST_20y = mean(surface_temp_sd[which(year >= 1994 &
-                                                           year <= 2014)], na.rm = TRUE),
-            meansd_BT_20y = mean(temp200m_sd[which(year >= 1994 &
-                                                        year <= 2014)], na.rm = TRUE))
+  summarise(mean_SST_20y = mean(sst[which(year >= 1991 &
+                                                     year <= 2012)], na.rm = TRUE),
+            mean_BT_20y = mean(bottom_temp[which(year >= 1991 &
+                                                year <= 2012)], na.rm = TRUE),
+            meansd_SST_20y = mean(surface_temp_sd[which(year >= 1991 &
+                                                           year <= 2012)], na.rm = TRUE),
+            meansd_BT_20y = mean(temp200m_sd[which(year >= 1991 &
+                                                        year <= 2012)], na.rm = TRUE))
 
 temperature_match <- left_join(temperature_summary, area_mean_BT, "inpfc_area")
   
-# Need to change to use 1994-2014 (where is 1991?)
 mean_temp <- temperature_match %>%
   group_by(year, inpfc_area) %>% # not in original script, changed in the GOA
-  summarise(mean_SST = mean(surface_temp , na.rm = TRUE),
-            mean_BT = mean(temp200m, na.rm = TRUE),
-            mean_SST_SD = mean(surface_temp_sd, na.rm = TRUE),
+  summarise(mean_SST = mean(sst , na.rm = TRUE),
+            mean_BT = mean(bottom_temp, na.rm = TRUE),
+            mean_surface_temp_sd = mean(surface_temp_sd, na.rm = TRUE),
             mean_BT_SD = mean(temp200m_sd, na.rm = TRUE),
             SST_20y = mean(mean_SST_20y, na.rm = TRUE),
             BT_20y = mean(mean_BT_20y, na.rm = TRUE)) %>% # changed to use 20 year mean instead
@@ -136,10 +137,23 @@ mean_temp <- temperature_match %>%
          BT_anomaly = mean_BT - BT_20y)
 
 
-all_years <- data.frame(year = c(1994:2022))
+all_years <- data.frame(year = c(1994:2024))
 mean_temp_all_years <- bind_rows(mean_temp, all_years) %>% arrange(year)
 
+anom_temp <- mean_temp %>%
+  group_by(inpfc_area) %>%
+  summarise(mean_SSTanom_20y = mean(SST_anomaly[which(year >= 1991 &
+                                                        year <= 2012)], na.rm = TRUE),
+            mean_BTanom_20y = mean(BT_anomaly[which(year >= 1991 &
+                                                      year <= 2012)], na.rm = TRUE))
+
+anom_match <- left_join(mean_temp, anom_temp, "inpfc_area")
+
+
 library(ggplot2)
+
+## Actual values
+# By area
 ggplot2::ggplot(data = mean_temp, 
                 aes(x = year,
                     y = mean_SST)) +
@@ -151,26 +165,26 @@ ggplot2::ggplot(data = mean_temp,
                  y = mean_BT,
                  color = "BT"),  
              size = 4) +
-  scale_color_manual(values = c("orange", "purple"),
+  scale_color_manual(values = c("darkorange", "darkorchid"),
                      breaks = c("SST", "BT")) +
-  geom_errorbar(aes(ymin = mean_SST - mean_SST_SD, 
-                    ymax = mean_SST + mean_SST_SD), 
-                color = "darkorange3", 
-                width = 1.5,
-                size = 1.2,
-                position = position_dodge(0.9)) +
-  geom_errorbar(aes(ymin = mean_BT - mean_BT_SD,
-                    ymax = mean_BT + mean_BT_SD), 
-                color = "purple4", 
-                width = 1.5, 
-                size = 1,
-                position = position_dodge(0.9)) +
-  geom_hline(yintercept = mean(mean_temp$mean_SST, na.rm = TRUE), 
-             color = "orange", 
+  # geom_errorbar(aes(ymin = mean_SST - mean_surface_temp_sd, 
+  #                   ymax = mean_SST + mean_surface_temp_sd), 
+  #               color = "darkorange3", 
+  #               width = 1.5,
+  #               size = 1.2,
+  #               position = position_dodge(0.9)) +
+  # geom_errorbar(aes(ymin = mean_BT - mean_BT_SD,
+  #                   ymax = mean_BT + mean_BT_SD), 
+  #               color = "purple4", 
+  #               width = 1.5, 
+  #               size = 1,
+  #               position = position_dodge(0.9)) +
+  geom_hline(aes(yintercept = mean_temp$SST_20y), 
+             color = "darkorange2", 
              size = 1) +
-  geom_hline(yintercept = mean(mean_temp$mean_BT, na.rm = TRUE), 
-             color = "purple", 
-             size = 1.2) +
+  geom_hline(aes(yintercept = mean_temp$BT_20y), 
+             color = "darkorchid3", 
+             size = 1) +
   ggtitle("Mean SST and Bottom Temp") +
   ylab("mean temperature (°C)") +
   theme_bw() +
@@ -191,9 +205,63 @@ ggplot2::ggplot(data = mean_temp,
                                 'Central Aleutians', 
                                 'Eastern Aleutians', 
                                 'Southern Bering Sea')))
+dev.copy(jpeg,
+         here('plots/2024',
+              'FigXX.png'),
+         height = 10,
+         width = 12,
+         res = 200,
+         units = 'in')
+dev.off()
 
-## anomaly plot
-ggplot2::ggplot(mean_temp, aes(x = year, y = SST_anomaly)) +
+# Overall area
+ggplot2::ggplot(data = mean_temp, 
+                aes(x = year,
+                    y = mean_SST)) +
+  geom_point(aes(x = year,
+                 y = mean_SST,
+                 color = "SST"), 
+             size = 4) +
+  geom_point(aes(x = year, 
+                 y = mean_BT,
+                 color = "BT"),  
+             size = 4) +
+  scale_color_manual(values = c("darkorange", "darkorchid"),
+                     breaks = c("SST", "BT")) +
+  geom_hline(yintercept = mean(mean_temp$SST_20y, na.rm = TRUE), 
+             color = "darkorange2", 
+             size = 1) +
+  geom_hline(yintercept = mean(mean_temp$BT_20y, na.rm = TRUE), 
+             color = "darkorchid3", 
+             size = 1) +
+  ggtitle("Mean SST and Bottom Temp") +
+  ylab("mean temperature (°C)") +
+  theme_bw() +
+  scale_x_continuous(breaks = round(seq(min(mean_temp$year), 2025, by = 4), 1)) + # max(mean_temp$year)
+  # scale_x_discrete(limits=c("1994","2000","2002","2004","2006","2008","2010","2012","2014","2016","2018","2020","2022")) +
+  theme(plot.title = element_text(size = 24),
+        legend.text = element_text(size = 15),
+        legend.title = element_blank(),
+        legend.position = "bottom",
+        strip.text = element_text(size = 18),
+        axis.title = element_text(size = 20),
+        axis.text.y = element_text(vjust = 0.5, hjust = 0.5, size = 17),
+        axis.text.x = element_text(angle = 75, vjust = 0.5, hjust = 0.5, size = 17),
+        axis.ticks = element_line(size = 2), 
+        axis.ticks.length = unit(0.25, "cm"))
+dev.copy(jpeg,
+         here('plots/2024',
+              'FigXXX.png'),
+         height = 10,
+         width = 10,
+         res = 200,
+         units = 'in')
+dev.off()
+
+
+## Anomaly plot
+# By area
+ggplot2::ggplot(anom_match, aes(x = year, y = SST_anomaly)) +
   geom_point(aes(x = year,
                  y = SST_anomaly,
                  color = "SST Anomaly"), 
@@ -202,18 +270,18 @@ ggplot2::ggplot(mean_temp, aes(x = year, y = SST_anomaly)) +
                  y = BT_anomaly,
                  color = "BT Anomaly"),  
              size = 4) +
-  scale_color_manual(values = c("orange", "purple"),
+  scale_color_manual(values = c("darkorange", "darkorchid"),
                      breaks = c("SST Anomaly", "BT Anomaly")) +
-  geom_hline(yintercept = mean(mean_temp$SST_anomaly, na.rm = TRUE),
-             col = "orange",
+  geom_hline(aes(yintercept = anom_match$mean_SSTanom_20y),
+             col = "darkorange2",
              size = 1) +
-  geom_hline(yintercept = mean(mean_temp$BT_anomaly, na.rm = TRUE),
-             col = "purple",
+  geom_hline(aes(yintercept = anom_match$mean_BTanom_20y),
+             col = "darkorchid3",
              size = 1) +
   ggtitle("Mean SST and Bottom Temp Anomalies") +
   ylab("mean temperature anomaly (°C)") +
   theme_bw() +
-  scale_x_continuous(breaks = round(seq(min(mean_temp$year), max(mean_temp$year), by = 4), 1)) +
+  scale_x_continuous(breaks = round(seq(min(anom_match$year), max(anom_match$year), by = 4), 1)) +
   # scale_x_discrete(limits = c("1994", "2000", "2002", "2004", "2006", "2008", "2010", "2012", "2014", "2016", "2018", "2020", "2022")) +
   theme(plot.title = element_text(size = 24),
         legend.text = element_text(size = 15),
@@ -230,10 +298,63 @@ ggplot2::ggplot(mean_temp, aes(x = year, y = SST_anomaly)) +
                                             'Central Aleutians', 
                                             'Eastern Aleutians', 
                                             'Southern Bering Sea')))
+dev.copy(jpeg,
+         here('plots/2024',
+              'FigXXXX.png'),
+         height = 10,
+         width = 12,
+         res = 200,
+         units = 'in')
+dev.off()
+
+# Overall area
+ggplot2::ggplot(anom_match, aes(x = year, y = SST_anomaly)) +
+  geom_point(aes(x = year,
+                 y = SST_anomaly,
+                 color = "SST Anomaly"), 
+             size = 4) +
+  geom_point(aes(x = year, 
+                 y = BT_anomaly,
+                 color = "BT Anomaly"),  
+             size = 4) +
+  scale_color_manual(values = c("darkorange", "darkorchid"),
+                     breaks = c("SST Anomaly", "BT Anomaly")) +
+  geom_hline(yintercept = mean(anom_match$mean_SSTanom_20y, na.rm = TRUE),
+             col = "darkorange2",
+             size = 1) +
+  geom_hline(yintercept = mean(anom_match$mean_BTanom_20y, na.rm = TRUE),
+             col = "darkorchid3",
+             size = 1) +
+  ggtitle("Mean SST and Bottom Temp Anomalies") +
+  ylab("mean temperature anomaly (°C)") +
+  theme_bw() +
+  scale_x_continuous(breaks = round(seq(min(anom_match$year), max(anom_match$year), by = 4), 1)) +
+  # scale_x_discrete(limits = c("1994", "2000", "2002", "2004", "2006", "2008", "2010", "2012", "2014", "2016", "2018", "2020", "2022")) +
+  theme(plot.title = element_text(size = 24),
+        legend.text = element_text(size = 15),
+        legend.title = element_blank(),
+        legend.position = "bottom",
+        strip.text = element_text(size = 18),
+        axis.title = element_text(size = 20),
+        axis.text.y = element_text(vjust = 0.5, hjust = 0.5, size = 17),
+        axis.text.x = element_text(angle = 75, vjust = 0.5, hjust = 0.5, size = 17),
+        axis.ticks = element_line(size = 2), 
+        axis.ticks.length = unit(0.25, "cm"))
+dev.copy(jpeg,
+         here('plots/2024',
+              'FigXXXXX.png'),
+         height = 10,
+         width = 10,
+         res = 200,
+         units = 'in')
+dev.off()
+
+
+
 
 # All years surface
 ggplot2::ggplot(temperature_summary, 
-                aes(x = year, y = surface_temp, group = year)) +
+                aes(x = year, y = sst, group = year)) +
   ggdist::stat_halfeye(adjust = 0.5,
                        justification = -0.2,
                        .width = 0,
@@ -260,7 +381,7 @@ ggplot2::ggplot(temperature_summary,
 
 # All years bottom
 ggplot2::ggplot(temperature_summary, 
-                aes(x = year, y = temp200m, group = year)) +
+                aes(x = year, y = bottom_temp, group = year)) +
   ggdist::stat_halfeye(adjust = 0.5,
                        justification = -0.2,
                        .width = 0,
@@ -289,7 +410,7 @@ ggplot2::ggplot(temperature_summary,
 temperature_summary_2022 <- temperature_summary[which(temperature_summary$year == 2022), ]
 
 sst <- ggplot2::ggplot(temperature_summary, 
-                       aes(x = year, y = surface_temp)) +
+                       aes(x = year, y = sst)) +
   geom_point(col = "orange", size = 3) +
   ylab("SST") +
   theme_bw() +
@@ -300,7 +421,7 @@ sst <- ggplot2::ggplot(temperature_summary,
 
 
 bt <- ggplot2::ggplot(temperature_summary, 
-                      aes(x = year, y = temp200m)) +
+                      aes(x = year, y = bottom_temp)) +
   geom_point(col = "purple", size = 3) +
   ylab("BT") +
   theme_bw() +
@@ -320,7 +441,7 @@ library(cowplot)
 
 ggplot(data = temperature_summary,
        aes(x = year,
-           y = temp200m)) +
+           y = bottom_temp)) +
   stat_slab(side = "right", 
             scale = 0.4,
             position = position_dodge(width = 0.8),
