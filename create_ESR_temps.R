@@ -106,6 +106,7 @@ temperature_summary$year <- as.integer(substring(temperature_summary$ob_time, 1,
 library(dplyr)
 library(tidyverse)
 library(here)
+library(ggplot2)
 # Limited to these years because earliest BT data available is in 1991 for AI
 # Casts are limited to 1994 so change if using those data instead
 total_mean_SST <- mean(temperature_summary$surface_temp[which(temperature_summary$year >= 1991 &
@@ -150,7 +151,6 @@ anom_temp <- mean_temp %>%
 anom_match <- left_join(mean_temp, anom_temp, "inpfc_area")
 
 
-library(ggplot2)
 
 ## Actual values
 # By area
@@ -188,7 +188,7 @@ ggplot2::ggplot(data = mean_temp,
   ggtitle("Mean SST and Bottom Temp") +
   ylab("mean temperature (°C)") +
   theme_bw() +
-  scale_x_continuous(breaks = round(seq(min(mean_temp$year), 2025, by = 4), 1)) + # max(mean_temp$year)
+  scale_x_continuous(breaks = round(seq(min(mean_temp$year), 2026, by = 3), 1)) + # max(mean_temp$year)
   # scale_x_discrete(limits=c("1994","2000","2002","2004","2006","2008","2010","2012","2014","2016","2018","2020","2022")) +
   theme(plot.title = element_text(size = 24),
         legend.text = element_text(size = 15),
@@ -237,7 +237,7 @@ ggplot2::ggplot(data = mean_temp,
   ggtitle("Mean SST and Bottom Temp") +
   ylab("mean temperature (°C)") +
   theme_bw() +
-  scale_x_continuous(breaks = round(seq(min(mean_temp$year), 2025, by = 4), 1)) + # max(mean_temp$year)
+  scale_x_continuous(breaks = round(seq(min(mean_temp$year), 2026, by = 3), 1)) + # max(mean_temp$year)
   # scale_x_discrete(limits=c("1994","2000","2002","2004","2006","2008","2010","2012","2014","2016","2018","2020","2022")) +
   theme(plot.title = element_text(size = 24),
         legend.text = element_text(size = 15),
@@ -281,7 +281,7 @@ ggplot2::ggplot(anom_match, aes(x = year, y = SST_anomaly)) +
   ggtitle("Mean SST and Bottom Temp Anomalies") +
   ylab("mean temperature anomaly (°C)") +
   theme_bw() +
-  scale_x_continuous(breaks = round(seq(min(anom_match$year), max(anom_match$year), by = 4), 1)) +
+  scale_x_continuous(breaks = round(seq(min(anom_match$year), max(anom_match$year), by = 3), 1)) +
   # scale_x_discrete(limits = c("1994", "2000", "2002", "2004", "2006", "2008", "2010", "2012", "2014", "2016", "2018", "2020", "2022")) +
   theme(plot.title = element_text(size = 24),
         legend.text = element_text(size = 15),
@@ -328,7 +328,7 @@ ggplot2::ggplot(anom_match, aes(x = year, y = SST_anomaly)) +
   ggtitle("Mean SST and Bottom Temp Anomalies") +
   ylab("mean temperature anomaly (°C)") +
   theme_bw() +
-  scale_x_continuous(breaks = round(seq(min(anom_match$year), max(anom_match$year), by = 4), 1)) +
+  scale_x_continuous(breaks = round(seq(min(anom_match$year), max(anom_match$year), by = 3), 1)) +
   # scale_x_discrete(limits = c("1994", "2000", "2002", "2004", "2006", "2008", "2010", "2012", "2014", "2016", "2018", "2020", "2022")) +
   theme(plot.title = element_text(size = 24),
         legend.text = element_text(size = 15),
@@ -351,62 +351,7 @@ dev.off()
 
 
 
-
-# All years surface
-ggplot2::ggplot(temperature_summary, 
-                aes(x = year, y = sst, group = year)) +
-  ggdist::stat_halfeye(adjust = 0.5,
-                       justification = -0.2,
-                       .width = 0,
-                       point_colour = "deeppink4",
-                       fill = "deeppink4") +
-  geom_boxplot(width = 0.15,
-               outlier.color = NA,
-               alpha = 0.5,
-               color = "black") +
-  geom_point(alpha = 0.05,
-             size = 3,
-             shape = 95,
-             color = "deeppink") +
-  ggtitle("Sea Surface Temperature") +
-  ylab("temperature (°C)") +
-  scale_x_continuous(breaks = round(seq(min(mean_temp$year), max(mean_temp$year), by = 4), 1)) +
-  theme_bw() +
-  theme(plot.title = element_text(size = 24),
-        axis.title = element_text(size = 20),
-        axis.text.y = element_text(vjust = 0.5, hjust = 0.5, size = 17),
-        axis.text.x = element_text(angle = 75, vjust = 0.5, hjust = 0.5, size = 17),
-        axis.ticks = element_line(size = 2), 
-        axis.ticks.length = unit(0.25, "cm"))
-
-# All years bottom
-ggplot2::ggplot(temperature_summary, 
-                aes(x = year, y = bottom_temp, group = year)) +
-  ggdist::stat_halfeye(adjust = 0.5,
-                       justification = -0.2,
-                       .width = 0,
-                       point_colour = "deeppink4",
-                       fill = "deeppink4") +
-  geom_boxplot(width = 0.15,
-               outlier.color = NA,
-               alpha = 0.5,
-               color = "black") +
-  geom_point(alpha = 0.1,
-             size = 3,
-             shape = 95,
-             color = "deeppink") +
-  ggtitle("Bottom Temperature") +
-  ylab("temperature (°C)") +
-  scale_x_continuous(breaks = round(seq(min(mean_temp$year), max(mean_temp$year), by = 4), 1)) +
-  theme_bw() +
-  theme(plot.title = element_text(size = 24),
-        axis.title = element_text(size = 20),
-        axis.text.y = element_text(vjust = 0.5, hjust = 0.5, size = 17),
-        axis.text.x = element_text(angle = 75, vjust = 0.5, hjust = 0.5, size = 17),
-        axis.ticks = element_line(size = 2), 
-        axis.ticks.length = unit(0.25, "cm"))
-
-
+# All years with casts
 temperature_summary_2022 <- temperature_summary[which(temperature_summary$year == 2022), ]
 
 sst <- ggplot2::ggplot(temperature_summary, 
@@ -431,39 +376,3 @@ bt <- ggplot2::ggplot(temperature_summary,
   facet_grid(~inpfc_area)
 
 gridExtra::grid.arrange(sst, bt, nrow = 1)
-
-
-# Possible alternatives
-library(gghalves)
-library(ggdist)
-library(ggpp)
-library(cowplot)
-
-ggplot(data = temperature_summary,
-       aes(x = year,
-           y = bottom_temp)) +
-  stat_slab(side = "right", 
-            scale = 0.4,
-            position = position_dodge(width = 0.8),
-            aes(fill_ramp = stat(level)),
-            fill = "darksalmon",
-            .width = c(0.5, 0.95, 1),
-            alpha = 0.8) +
-  stat_dots(side = "left", 
-            scale = 0.4, 
-            position = position_dodge(width = 0.2),
-            color = "black",
-            alpha = 0.2) +
-  stat_summary(fun.data = "mean_cl_normal",
-               size = 0.4,
-               position = position_dodge2nudge(x = 0.1, width = 0.8)) +
-  ggtitle("Bottom Temperature") +
-  ylab("temperature (°C)") +
-  scale_x_continuous(breaks = round(seq(min(mean_temp$year), max(mean_temp$year), by = 4), 1)) +
-  theme_bw() +
-  theme(plot.title = element_text(size = 24),
-        axis.title = element_text(size = 20),
-        axis.text.y = element_text(vjust = 0.5, hjust = 0.5, size = 17),
-        axis.text.x = element_text(angle = 75, vjust = 0.5, hjust = 0.5, size = 17),
-        axis.ticks = element_line(size = 2), 
-        axis.ticks.length = unit(0.25, "cm"))
