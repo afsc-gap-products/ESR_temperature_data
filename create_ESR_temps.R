@@ -109,9 +109,9 @@ library(here)
 library(ggplot2)
 # Limited to these years because earliest BT data available is in 1991 for AI
 # Casts are limited to 1994 so change if using those data instead
-total_mean_SST <- mean(temperature_summary$surface_temp[which(temperature_summary$year >= 1991 &
+total_mean_SST <- mean(temperature_summary$sst[which(temperature_summary$year >= 1991 &
                                                                 temperature_summary$year <= 2012)], na.rm = TRUE)
-total_mean_BT <- mean(temperature_summary$temp200m[which(temperature_summary$year >= 1991 & 
+total_mean_BT <- mean(temperature_summary$bottom_temp[which(temperature_summary$year >= 1991 & 
                                                            temperature_summary$year <= 2012)], na.rm = TRUE)
 area_mean_BT <- temperature_summary %>%
   group_by(inpfc_area) %>%
@@ -154,6 +154,7 @@ anom_match <- left_join(mean_temp, anom_temp, "inpfc_area")
 
 ## Actual values
 # By area
+# Regional means
 ggplot2::ggplot(data = mean_temp, 
                 aes(x = year,
                     y = mean_SST)) +
@@ -208,6 +209,67 @@ ggplot2::ggplot(data = mean_temp,
 dev.copy(jpeg,
          here('plots/2024',
               'FigXXX.png'),
+         height = 10,
+         width = 12,
+         res = 200,
+         units = 'in')
+dev.off()
+
+# Overall means
+ggplot2::ggplot(data = mean_temp, 
+                aes(x = year,
+                    y = mean_SST)) +
+  geom_point(aes(x = year,
+                 y = mean_SST,
+                 color = "SST"), 
+             size = 4) +
+  geom_point(aes(x = year, 
+                 y = mean_BT,
+                 color = "BT"),  
+             size = 4) +
+  scale_color_manual(values = c("darkorange", "darkorchid"),
+                     breaks = c("SST", "BT")) +
+  # geom_errorbar(aes(ymin = mean_SST - mean_surface_temp_sd, 
+  #                   ymax = mean_SST + mean_surface_temp_sd), 
+  #               color = "darkorange3", 
+  #               width = 1.5,
+  #               size = 1.2,
+  #               position = position_dodge(0.9)) +
+  # geom_errorbar(aes(ymin = mean_BT - mean_BT_SD,
+  #                   ymax = mean_BT + mean_BT_SD), 
+  #               color = "purple4", 
+  #               width = 1.5, 
+  #               size = 1,
+  #               position = position_dodge(0.9)) +
+  geom_hline(yintercept = mean(mean_temp$SST_20y, na.rm = TRUE), 
+             color = "darkorange2", 
+             size = 1) +
+  geom_hline(yintercept = mean(mean_temp$BT_20y, na.rm = TRUE), 
+             color = "darkorchid3", 
+             size = 1) +
+  ggtitle("Mean SST and Bottom Temp") +
+  ylab("mean temperature (°C)") +
+  theme_bw() +
+  scale_x_continuous(breaks = round(seq(min(mean_temp$year), 2026, by = 3), 1)) + # max(mean_temp$year)
+  # scale_x_discrete(limits=c("1994","2000","2002","2004","2006","2008","2010","2012","2014","2016","2018","2020","2022")) +
+  theme(plot.title = element_text(size = 24),
+        legend.text = element_text(size = 15),
+        legend.title = element_blank(),
+        legend.position = "bottom",
+        strip.text = element_text(size = 18),
+        axis.title = element_text(size = 20),
+        axis.text.y = element_text(vjust = 0.5, hjust = 0.5, size = 17),
+        axis.text.x = element_text(angle = 75, vjust = 0.5, hjust = 0.5, size = 17),
+        axis.ticks = element_line(size = 2), 
+        axis.ticks.length = unit(0.25, "cm")) +
+  facet_grid(~factor(inpfc_area,
+                     levels = c('Western Aleutians', 
+                                'Central Aleutians', 
+                                'Eastern Aleutians', 
+                                'Southern Bering Sea')))
+dev.copy(jpeg,
+         here('plots/2024',
+              'FigXXXXX.png'),
          height = 10,
          width = 12,
          res = 200,
