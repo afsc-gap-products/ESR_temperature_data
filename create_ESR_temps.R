@@ -1,15 +1,26 @@
-source(paste0(getwd(),"/R/make.esr.temperature.data.R"))
-make.esr.temperatures() # function has to be changed depending on survey
+# Libraries
+library(here)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+
+# Functions
+source(here("functions", "make.esr.temperature.data.R"))
+
+# Retrieve Data
+# The script in this function has to be changed depending on survey
 # subregion is used for GOA, inpfc_area for AI
 # stratum and stationid are not column names/queried for GOA
+
+make.esr.temperatures() 
+
 
 ##### GULF OF ALASKA #######
 # 
 # temperature_summary <- read.csv(paste0(getwd(),"/temperature_summary.csv"))
 # temperature_summary$year <- as.integer(substring(temperature_summary$ob_time,1,4))
 # 
-# library(dplyr)
-# library(tidyverse)
+
 # total_mean_SST <- mean(temperature_summary$surface_temp[which(temperature_summary$year >= 1993 & temperature_summary$year <= 2013)], na.rm=TRUE)
 # total_mean_BT <- mean(temperature_summary$temp200m[which(temperature_summary$year >= 1993 & temperature_summary$year <= 2013)], na.rm=TRUE)
 # 
@@ -29,7 +40,7 @@ make.esr.temperatures() # function has to be changed depending on survey
 # mean_temp$subregion[which(mean_temp$subregion == "egoa")] <- "eastern GOA"
 # mean_temp$subregion[which(mean_temp$subregion == "cgoa")] <- "central GOA"
 # 
-# library(ggplot2)
+
 # ggplot2::ggplot(mean_temp, aes(x=year, y = mean_SST)) +
 #   geom_point(col = "orange", size = 6) +
 #   geom_errorbar(aes(ymin=mean_SST-mean_surface_temp_sd, ymax=mean_SST+mean_surface_temp_sd), width=2,
@@ -105,10 +116,7 @@ make.esr.temperatures() # function has to be changed depending on survey
 temperature_summary <- read.csv(paste0(getwd(), "/temperature_summary.csv"))
 temperature_summary$year <- as.integer(substring(temperature_summary$ob_time, 1, 4))
 
-library(dplyr)
-library(tidyverse)
-library(here)
-library(ggplot2)
+
 # Limited to these years because earliest BT data available is in 1991 for AI
 # Casts are limited to 1994 so change if using those data instead
 total_mean_SST <- mean(temperature_summary$sst[which(temperature_summary$year >= 1991 &
