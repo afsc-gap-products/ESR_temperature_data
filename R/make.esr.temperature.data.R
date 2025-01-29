@@ -96,10 +96,10 @@ make.esr.temperatures <- function(){
 
      # data frame for temperature summary data
      temperature.summary <- data.frame()
-     temp.summary.names <- c("vessel","cruise","haul","inpfc_area","surface_temp","surface_temp_sd","surface_temp_n",
+     temp.summary.names <- c("vessel","cruise","haul","subregion","surface_temp","surface_temp_sd","surface_temp_n",
                              "temp100m","temp100m_sd","temp100m_n","temp200m","temp200m_sd","temp200m_n", "sst", "bottom_temp")
-     pos.temp.names <- c("vessel", "cruise", "haul", "stationid", "stratum", "inpfc_area", "longitude", "latitude",
-                         "bottom_depth", "sst", "bottom_temp", "ob_time", "fb_time")
+     pos.temp.names <- c("vessel", "cruise", "haul", "subregion", "longitude", "latitude",
+                         "bottom_depth", "sst", "bottom_temp", "ob_time", "fb_time") # add back stratum and stationid for AI
      
      for(Cr in sort(unique(dat$cruise))){
        
@@ -112,7 +112,7 @@ make.esr.temperatures <- function(){
          for(H in sort(unique(v.cr.dat$haul))){
            print(paste0("Getting downcast for Vessel/Cruise/Haul ", V, "/", Cr, "/", H, "..."))
            h.v.cr.dat <- v.cr.dat[v.cr.dat$haul == H, ]
-           inpfc_area <- pos.time.dat$inpfc_area[pos.time.dat$cruise == Cr & pos.time.dat$vessel == V & pos.time.dat$haul == H]
+           subregion <- pos.time.dat$subregion[pos.time.dat$cruise == Cr & pos.time.dat$vessel == V & pos.time.dat$haul == H]
            # subregion <- pos.time.dat$subregion[pos.time.dat$cruise == Cr & pos.time.dat$vessel == V & pos.time.dat$haul == H]
            ob.time <- pos.time.dat$ob_time[pos.time.dat$cruise == Cr & pos.time.dat$vessel == V & pos.time.dat$haul == H]
            fb.time <- pos.time.dat$fb_time[pos.time.dat$cruise == Cr & pos.time.dat$vessel == V & pos.time.dat$haul == H]
@@ -184,9 +184,9 @@ make.esr.temperatures <- function(){
            
            # out.vec <- c(V,Cr,H, subregion, surface.temp, surface.temp.sd, surface.temp.n, temp.100, temp.100.sd, temp.100.n,
            #              temp.200, temp.200.sd, temp.200.n)
-           out.vec <- c(V,Cr,H, inpfc_area, surface.temp, surface.temp.sd, surface.temp.n, temp.100, temp.100.sd, temp.100.n,
+           out.vec <- c(V, Cr, H, subregion, surface.temp, surface.temp.sd, surface.temp.n, temp.100, temp.100.sd, temp.100.n,
                         temp.200, temp.200.sd, temp.200.n, sst, gear.temp)
-           temperature.summary <- rbind(temperature.summary,out.vec)
+           temperature.summary <- rbind(temperature.summary, out.vec)
          }
        }
      }

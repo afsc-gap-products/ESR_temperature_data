@@ -1,5 +1,7 @@
 source(paste0(getwd(),"/R/make.esr.temperature.data.R"))
-make.esr.temperatures()
+make.esr.temperatures() # function has to be changed depending on survey
+# subregion is used for GOA, inpfc_area for AI
+# stratum and stationid are not column names/queried for GOA
 
 ##### GULF OF ALASKA #######
 # 
