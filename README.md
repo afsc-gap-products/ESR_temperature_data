@@ -8,4 +8,4 @@ This repository is used to create the Aleutian Islands regional temperature plot
 2.  For Aleutian Islands years, use "inpfc_area" instead of "subregion" on lines 99, 101, 115, 187. Add "stratum" and "stationid" on lines 99 and 101.
 3.  For the Gulf of Alaska, use "subregion" instead of "inpfc_area" on lines 99, 101, 115, 187. Remove "stratum" and "stationid" on lines 99 and 101.
 
-The data output is found in temperature_summary.csv. Final plots should be placed in the appropriate "plots" sub-folder. All additional scripts used in previous temperature ESR contributions are found in the archive folder.
+The data output is found in temperature_summary.csv. Final plots should be placed in the appropriate "plots" sub-folder - these are only used in the Aleutian Islands ESR. All additional scripts used in previous temperature ESR contributions are found in the archive folder.
